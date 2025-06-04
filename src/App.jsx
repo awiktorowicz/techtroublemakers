@@ -1,6 +1,8 @@
+import { CheckCircle, Clock, Loader2, Search, Users } from 'lucide-react';
 import React, { useState } from 'react';
-import { Search, Users, CheckCircle, Clock, Loader2 } from 'lucide-react';
 import barclaysLogo from './assets/barclays.svg';
+import Chatbot from './Chatbot';
+
 
 const AccessHub = () => {
     const [userId, setUserId] = useState('');
@@ -54,7 +56,9 @@ const AccessHub = () => {
                         'Figma',
                         'Adobe Illustrator',
                         'Google Classroom',
-                        'Terraform'
+                        'Terraform',
+                        { name: 'DB Access', ai: true },
+                        { name: 'Databrick Access', ai: true }
                     ]
                 });
                 setLoading(false);
@@ -164,12 +168,17 @@ const AccessHub = () => {
                                         Essential Groups
                                     </h3>
                                     <div className="space-y-3">
-                                        {results.essential?.map((group, index) => (
-                                            <div key={index} className="flex items-center p-3 bg-white rounded-lg border border-green-200">
-                                                <CheckCircle className="w-4 h-4 text-green-600 mr-3 flex-shrink-0" />
-                                                <a href={`/request-system?name=${group}`}><span className="text-gray-800 font-medium">{group}</span></a>
-                                            </div>
-                                        ))}
+
+                                        {results.essential?.map((group, index) => {
+                                            const isSelected = group === 'VS Code' || group === 'AWS CLI';
+                                            return (
+                                                <div key={index} className={`flex items-center p-3 rounded-lg border list-item${isSelected ? ' background-highlight' : ' bg-white border-green-200'}`}
+                                                    style={isSelected ? { fontWeight: 600, boxShadow: '0 2px 8px rgba(0,118,182,0.10)' } : {}}>
+                                                    <CheckCircle className={`w-4 h-4 mr-3 flex-shrink-0 ${isSelected ? 'text-[#0076B6]' : 'text-green-600'}`} />
+                                                    <a href={`/request-system?name=${group}`}><span className="font-medium" style={isSelected ? { color: '#0076B6' } : {}}>{group}</span></a>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                     <div className="mt-4 p-3 bg-green-100 rounded-lg">
                                         <p className="text-sm text-green-700">
@@ -185,12 +194,35 @@ const AccessHub = () => {
                                         Optional Groups
                                     </h3>
                                     <div className="space-y-3">
-                                        {results.optional?.map((group, index) => (
-                                            <div key={index} className="flex items-center p-3 bg-white rounded-lg border border-blue-200">
-                                                <Clock className="w-4 h-4 text-blue-600 mr-3 flex-shrink-0" />
-                                                <a href={`/request-system?name=${group}`}><span className="text-gray-800 font-medium">{group}</span></a>
-                                            </div>
-                                        ))}
+                                        {results.optional?.map((group, index) => {
+                                            const isAI = typeof group === 'object' && group.ai;
+                                            const groupName = typeof group === 'string' ? group : group.name;
+                                            const isSelected = groupName === 'Databrick Access' || groupName === 'DB Access';
+                                            return (
+                                                <div key={index} className={`flex items-center p-3 rounded-lg border list-item${isSelected ? ' background-highlight' : ' bg-white border-blue-200'}${isAI ? ' border-blue-600 shadow-md' : ''}`}
+                                                    style={{ fontWeight: isSelected ? 600 : undefined, boxShadow: isSelected ? '0 2px 8px rgba(0,118,182,0.10)' : undefined, position: isAI ? 'relative' : undefined }}>
+                                                    <Clock className={`w-4 h-4 mr-3 flex-shrink-0 ${isSelected ? 'text-[#0076B6]' : 'text-blue-600'}`} />
+                                                    <a href={`/request-system?name=${groupName}`}><span className="font-medium" style={isSelected ? { color: '#0076B6' } : {}}>{groupName}</span></a>
+                                                    <span style={{ flex: 1 }} />
+                                                    {isAI && (
+                                                        <span className={isSelected ? 'ai-tag highlight-text' : ''} style={!isSelected ? {
+                                                            background: '#0076B6',
+                                                            color: '#fff',
+                                                            fontSize: 11,
+                                                            fontWeight: 700,
+                                                            borderRadius: 6,
+                                                            padding: '2px 8px',
+                                                            marginLeft: 10,
+                                                            marginRight: 0,
+                                                            marginTop: 0,
+                                                            marginBottom: 0,
+                                                            letterSpacing: 1,
+                                                            boxShadow: '0 1px 4px rgba(0,118,182,0.10)'
+                                                        } : {}}>AI</span>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                     <div className="mt-4 p-3 bg-blue-100 rounded-lg">
                                         <p className="text-sm text-blue-700">
@@ -198,6 +230,15 @@ const AccessHub = () => {
                                         </p>
                                     </div>
                                 </div>
+                            </div>
+                            <div className="flex justify-end mt-8">
+                                <button
+                                    className="bg-[#0076B6] text-white font-semibold rounded-lg px-8 py-3 text-lg shadow-md hover:bg-blue-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-offset-2"
+                                    style={{ minWidth: 220 }}
+                                    disabled
+                                >
+                                    Request Selected (4)
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -208,6 +249,20 @@ const AccessHub = () => {
                     <p>Built with ❤️ by Tech Troublemakers</p>
                 </div>
             </div>
+            <Chatbot />
+            <style>{`
+            .list-item.background-highlight {
+                background-color: #f0f8ff;
+                border: 2px solid rgba(136, 189, 246, 0.72);
+                display: flex;
+            }
+            .ai-tag.highlight-text {
+                background: none;
+                padding: 0;
+                margin-right: 10px;
+                color: #5588cc;
+                font-weight: bold;
+            `}</style>
         </div>
     );
 };
